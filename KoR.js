@@ -24,6 +24,8 @@ function myscript() {
 
 //================================================================================
 
+    var isTennisNotNeeded = false;
+    var scoreLabelTennisNotNeeded = 'N/A';
 
     function cleanScoreBoard() {
         clearTimeout(undo_highlight_timeout_ft);
@@ -37,7 +39,10 @@ function myscript() {
         scoreElem.addClass('player__score--show');
         if (scoreElem.text() != newScore) {
             var previousScore = scoreElem.text();
-            scoreElem.text(newScore);
+            // set score, except when N/A filled in (tennis not needed)
+            if (!isTennisNotNeeded || scoreLabelTennisNotNeeded != scoreElem.text()) {
+                scoreElem.text(newScore);
+            }
 
             var previousScoreInt = parseInt(previousScore, 10);
             var newScoreInt = parseInt(newScore, 10);
@@ -120,7 +125,7 @@ function myscript() {
         $('.footer_vs_player1__flag').attr("src", "http://data.8wr.io/sba/11/flags/" + docData['country_1'] + ".png");
         $('.footer_vs_player2__flag').attr("src", "http://data.8wr.io/sba/11/flags/" + docData['country_2'] + ".png");
 
-        var tennisCallback = function() { updateSport('.player__score__te', 'scorete'); };
+        var tennisCallback = function() { updateSport('.player__score__te', 'scorete',function() {}); };
         var squashCallback = function() { updateSport('.player__score__sq', 'scoresq', tennisCallback); };
         var badmintonCallback = function() { updateSport('.player__score__bd', 'scorebd',  squashCallback); };
         updateSport('.player__score__tt', 'scorett',  badmintonCallback);
@@ -157,18 +162,72 @@ function myscript() {
         var deltaBAD = player1ScoreBAD - player2ScoreBAD;
         var deltaSQ = player1ScoreSQ - player2ScoreSQ;
         var deltaTE = player1ScoreTE - player2ScoreTE;
-        var gameDelta = deltaTT + deltaBAD + deltaSQ + deltaTE;
+        var delta_after_sq = deltaTT + deltaBAD + deltaSQ;
+        var gameDelta = delta_after_sq + deltaTE;
 
-        // squash finished
-        if ((player1ScoreSQ >= 21 || player2ScoreSQ >= 21) && (Math.abs(deltaSQ) > 1)) {
+        var leader = $('.player1.player__name').text();
+        if (gameDelta < 0) { leader = $('.player2.player__name').text(); }
+
+        // squash finished, sport is tennis
+        if ((player1ScoreSQ >= 21 || player2ScoreSQ >= 21) && Math.abs(deltaSQ) > 1) {
+
+            var leader_points_te, loser_points_te = 0;
+            var leader_after_squash, loser_after_squash;
+            if (delta_after_sq >= 0 )  {
+                leader_after_squash = $('.player1.player__name').text();
+                loser_after_squash = $('.player2.player__name').text();
+                leader_points_te = player1ScoreTE;
+                loser_points_te = player2ScoreTE;
+            } else {
+                leader_after_squash = $('.player2.player__name').text();
+                loser_after_squash = $('.player1.player__name').text();
+                leader_points_te = player2ScoreTE;
+                loser_points_te = player1ScoreTE;
+            }
+
+            var tennis_points_needed = 21 - Math.abs(delta_after_sq) + 1;
+            var tennisEnded = (player1ScoreTE >= 21 || player2ScoreTE >= 21) && Math.abs(deltaTE) > 1;
+
+            if (Math.abs(delta_after_sq) > 21)  {
+                // game finished after squash, no need for tennis
+                isTennisNotNeeded = true;
+                $('.footer').text(leader + ' wins by ' + Math.abs(gameDelta));
+                $('.player1.player__score__te').text('N/A');
+                $('.player2.player__score__te').text('N/A');
+            }
+            else if (leader_points_te < tennis_points_needed && !tennisEnded) {
+                $('.footer').text(leader_after_squash + ' needs ' + tennis_points_needed + ' to win');
+            }
+            else if (leader_points_te >= tennis_points_needed) {
+                $('.footer').text(leader_after_squash + ' wins (needed ' + tennis_points_needed + ' points)');
+            }
+            else {
+                // at this point, tennis has ended
+
+                if (gameDelta === 0) {
+                    $('.footer').text('Gummyarm decides the match!');
+                }
+                else if (Math.abs(deltaTE) > 2 && loser_points_te > 21 && gameDelta > 0)  {
+                    $('.footer').text($('.player1.player__name').text() + ' wins with Gummyarm!');
+                }
+                else if (Math.abs(deltaTE) > 2 && loser_points_te > 21 && gameDelta < 0)  {
+                    $('.footer').text($('.player2.player__name').text() + ' wins with Gummyarm!');
+                }
+                else {
+                    $('.footer').text(loser_after_squash + ' wins (needed to keep ' + leader_after_squash + ' under ' + (tennis_points_needed - 1) + ')');
+                }
+            }
 
             return
         }
 
        // squash not finished yet
-        if (gameDelta === 0) {  $('.footer').text('Equal number of total points'); }
-        else if (gameDelta > 0) { $('.footer').text($('.player1.player__name').text() + ' leads by ' + gameDelta); }
-        else { $('.footer').text($('.player2.player__name').text() + ' leads by ' + Math.abs(gameDelta)); }
+        if (gameDelta === 0) {
+            $('.footer').text('Equal number of total points');
+        }
+        else {
+            $('.footer').text(leader + ' leads by ' + Math.abs(gameDelta));
+        }
 
     }
 
@@ -202,4 +261,4 @@ setTimeout(function() {docData['scorett_1s'] = "1"; myscript(); }, 13000);
 setTimeout(function() {docData['scorett_1s'] = "2"; myscript(); }, 23000);
 setTimeout(function() {docData['scorett_1s'] = "21"; myscript(); }, 33000);
 setTimeout(function() {docData['scorebd_1s'] = "1"; myscript(); }, 43000);
-setTimeout(function() {docData['scorebd_1s'] = "2"; myscript(); }, 43000);
+setTimeout(function() {docData['scorebd_1s'] = "21"; myscript(); }, 43000);
