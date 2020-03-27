@@ -184,7 +184,6 @@ function myscript() {
     cleanScoreBoard();
 
 // Update scoreboard with new data
-
     updateScoreBoard();
 
 
