@@ -1,0 +1,216 @@
+/* =================== variables ==================== */
+
+.scoreboard {
+    --backgroundCol: rgb(247,247,247);
+    --textCol: rgb(50, 50, 50);
+    --sportCol: rgb(150, 150, 150);
+    --scoreCol: rgb(150, 150, 150);
+    --activeScoreCol: rgb(70, 70, 70);
+    --titleTextCol: rgb(65, 116, 140);
+    --footerBackgroundCol: white;
+    --highlightCol: bisque;
+
+    --titleFontSize: x-large;
+    --textFontSize: medium;
+    --highlightFontSize: x-large;
+    --activeScoreFontSize: x-large;
+}
+
+.player__score.player__score--currentSport {
+    --textFontSize: x-large;
+    --highlightFontSize: xx-large;
+}
+
+/* =================== CSS rules ==================== */
+
+.scoreboard {
+    background-color: var(--backgroundCol);
+    font-family: "Tahoma", sans-serif;
+    color: var(--textCol);
+    font-size: var(--textFontSize);
+    text-shadow: none;
+    display: none;
+    padding: 7px;
+    min-width: 500px;
+    max-width: 1100px;
+    grid-template-columns: [first-col] minmax(0px, 0.3fr) minmax(30px,60px) auto minmax(20px, 40px) minmax(0px, 1fr) repeat(4, minmax(auto, 100px)) minmax(0px, 0.3fr) [last-col];
+    grid-template-rows: auto auto [row-player1-start] auto [row-player2-start] auto [row-player2-end] 20px [footer-start] auto [footer-end];
+    grid-template-areas:
+            "header header header header header header header header header header"
+            ". . . . . sport_tt sport_bd sport_sq sport_te ."
+            ". shirt1 name1 flag1 . score_tt1 score_bd1 score_sq1 score_te1 ."
+            ". shirt2 name2 flag2 . score_tt2 score_bd2 score_sq2 score_te2 ."
+            ". . . . . . . . . ."
+            "footer footer footer footer footer footer footer footer footer footer";
+}
+
+.scoreboard--visible {
+    display: grid;
+}
+
+.scoreboard > * {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header { grid-area: header; justify-self: start; display: flex; flex-direction: column; align-items: start; justify-content: start; }
+.header__title { margin: 10px 0 0 0; color: var(--titleTextCol); font-size: var(--titleFontSize); }
+.header__time { margin: 0; }
+.sponsor { grid-area: header; justify-self: end; }
+.sponsor__logo { max-height: 50px; }
+.footer__grid__row { grid-area: footer-start / first-col / footer-end / last-col; min-height: 70px; background-color: var(--footerBackgroundCol) }
+.footer { color: var(--titleTextCol); }
+.footer_vs_player1 { display: none; }
+.footer_vs_player2 { display: none; }
+
+.sport { margin: 10px 0 5px 0; text-align: center; color: var(--sportCol); }
+.sport--tt { grid-area: sport_tt; }
+.sport--bd { grid-area: sport_bd; }
+.sport--sq { grid-area: sport_sq; }
+.sport--te { grid-area: sport_te; }
+
+/* general player */
+.player__shirt__svg { width: 60%; margin: 5px 0 5px 0; }
+.player__flag__image { width: calc(100% - 10px); }
+.player__score { text-align: center; visibility: hidden; color: var(--scoreCol); }
+.player__score--show { visibility: visible; }
+.player__score--currentSport { font-size: var(--textFontSize); color: var(--activeScoreCol); }
+.player__name { margin: 0 20px 0 20px; justify-content: left; }
+
+/* player 1 specifics */
+.player1.player__grid__row { grid-area: row-player1-start / first-col / row-player2-start / last-col; }
+.player1.player__shirt { grid-area: shirt1; }
+.player1.player__shirt path { stroke: black; }
+.player1.player__name { grid-area: name1; }
+.player1.player__flag { grid-area: flag1; }
+.player1.player__score__tt { grid-area: score_tt1; }
+.player1.player__score__bd { grid-area: score_bd1; }
+.player1.player__score__sq { grid-area: score_sq1; }
+.player1.player__score__te { grid-area: score_te1; }
+
+/* player 2 specifics */
+.player2.player__grid__row { grid-area: row-player2-start / first-col / row-player2-end / last-col; }
+.player2.player__shirt { grid-area: shirt2; }
+.player2.player__shirt path { stroke: black; }
+.player2.player__name { grid-area: name2; }
+.player2.player__flag { grid-area: flag2; }
+.player2.player__score__tt { grid-area: score_tt2; }
+.player2.player__score__bd { grid-area: score_bd2; }
+.player2.player__score__sq { grid-area: score_sq2; }
+.player2.player__score__te { grid-area: score_te2; }
+
+
+
+/* =================== CSS rules when match has not started ==================== */
+
+.scoreboard--matchNotStarted {
+    grid-template-columns: [first-col] auto [last-col];
+    grid-template-rows: minmax(150px, auto) [footer-start] auto [footer-end];
+    grid-template-areas:
+            "header"
+            ".";
+    padding-bottom: 50px;
+}
+
+.scoreboard--matchNotStarted .header {
+    flex-direction: column-reverse;
+    justify-self: center;
+    align-items: center;
+    justify-content: center;
+}
+
+.scoreboard--matchNotStarted .sponsor {
+    align-items: start;
+}
+
+.scoreboard--matchNotStarted .player1,
+.scoreboard--matchNotStarted .player2,
+.scoreboard--matchNotStarted .sport {
+    display: none;
+}
+
+.scoreboard--matchNotStarted .footer {
+    width: 10%;
+    text-align: center;
+}
+
+.scoreboard--matchNotStarted .footer_vs_player1,
+.scoreboard--matchNotStarted .footer_vs_player2 {
+    width: 45%;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.scoreboard--matchNotStarted .footer_vs_player2 {
+    flex-direction: row-reverse;
+}
+
+.scoreboard--matchNotStarted .footer_vs_player1__flag {
+    width: 25px;
+    margin: 0 0 0 30px;
+}
+
+.scoreboard--matchNotStarted .footer_vs_player2__flag {
+    width: 25px;
+    margin: 0 30px 0 0;
+}
+
+.scoreboard--matchNotStarted .footer_vs_player1__name {
+    text-align: end;
+}
+
+.scoreboard--matchNotStarted .footer_vs_player2__name {
+    text-align: left;
+}
+
+/* =================== animations ==================== */
+
+.player__grid__row.highlight {
+    animation: highlight_row 1000ms ease 0ms 1 alternate;
+    animation-fill-mode: forwards;
+}
+.player__grid__row.undo__highlight {
+    animation: undo_highlight_row 1000ms ease 0ms 1 normal;
+    animation-fill-mode: forwards;
+}
+@keyframes highlight_row {
+    0% { background-color: var(--backgroundCol); }
+    100% { background-color: var(--highlightCol); }
+}
+
+@keyframes undo_highlight_row {
+    0% { background-color: var(--highlightCol); }
+    100% { background-color: var(--backgroundCol); }
+}
+
+.player__score.highlight {
+    animation: highlight_score 500ms ease 800ms 3 alternate;
+    animation-fill-mode: forwards;
+}
+.player__score.undo__highlight {
+    animation: undo_highlight_score 1000ms ease 0ms 1 normal;
+    animation-fill-mode: forwards;
+}
+@keyframes highlight_score {
+    0% {
+        font-weight: normal;
+        font-size: var(--textFontSize);
+    }
+    100% {
+        font-weight: bold;
+        font-size: var(--highlightFontSize);
+    }
+}
+@keyframes undo_highlight_score {
+    0% {
+        font-weight: bold;
+        font-size: var(--highlightFontSize);
+    }
+    100% {
+        font-weight: normal;
+        font-size: var(--textFontSize);
+    }
+}
