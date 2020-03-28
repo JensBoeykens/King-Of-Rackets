@@ -181,12 +181,13 @@ function myscript() {
             } else {
                 leader_after_squash = $('.player2.player__name').text();
                 loser_after_squash = $('.player1.player__name').text();
-                leader_points_te = player2ScoreTE;
+                leader_points_te = player2ScoreTE;56
                 loser_points_te = player1ScoreTE;
             }
 
             var tennis_points_needed = 21 - Math.abs(delta_after_sq) + 1;
             var tennisEnded = (player1ScoreTE >= 21 || player2ScoreTE >= 21) && Math.abs(deltaTE) > 1;
+            var tennisStarted = player1ScoreTE > 0 || player2ScoreTE > 0;
 
             if (Math.abs(delta_after_sq) > 21)  {
                 // game finished after squash, no need for tennis
@@ -194,6 +195,12 @@ function myscript() {
                 $('.footer').text(leader + ' wins by ' + Math.abs(gameDelta));
                 $('.player1.player__score__te').text('N/A');
                 $('.player2.player__score__te').text('N/A');
+            }
+            else if (!tennisStarted && Math.abs(delta_after_sq) == 0) {
+                $('.footer').text('Tennis is the decider: Draw after squash');
+            }
+            else if (!tennisStarted) {
+                $('.footer').text('Tennis is the decider: ' + leader + ' leads by ' + Math.abs(delta_after_sq) + ' after squash');
             }
             else if (leader_points_te < tennis_points_needed && !tennisEnded) {
                 $('.footer').text(leader_after_squash + ' needs ' + tennis_points_needed + ' to win');
