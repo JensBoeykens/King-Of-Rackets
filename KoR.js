@@ -24,9 +24,6 @@ function myscript() {
 
 //================================================================================
 
-    var isTennisNotNeeded = false;
-    var scoreLabelTennisNotNeeded = 'N/A';
-
     function cleanScoreBoard() {
         clearTimeout(undo_highlight_timeout_ft);
         clearTimeout(next_sport_timeout_ft);
@@ -39,10 +36,7 @@ function myscript() {
         scoreElem.addClass('player__score--show');
         if (scoreElem.text() != newScore) {
             var previousScore = scoreElem.text();
-            // set score, except when N/A filled in (tennis not needed)
-            if (!isTennisNotNeeded || scoreLabelTennisNotNeeded != scoreElem.text()) {
-                scoreElem.text(newScore);
-            }
+            scoreElem.text(newScore);
 
             var previousScoreInt = parseInt(previousScore, 10);
             var newScoreInt = parseInt(newScore, 10);
@@ -77,7 +71,7 @@ function myscript() {
         }
 
         var delta = Math.abs(player1Score - player2Score);
-        var sportFinished = player1Score >= 21 && delta > 1 || player2Score >= 21 && delta > 1
+        var sportFinished = player1Score >= 21 && delta > 1 || player2Score >= 21 && delta > 1;
 
         if (!sportFinished || isHighlighting) {
             $(player1ScoreSelector).addClass('player__score--currentSport');
@@ -98,7 +92,8 @@ function myscript() {
 
         if (sportFinished('.player1' + scoreSelector,'.player2' + scoreSelector, isHighlighting)) {
             if (isHighlighting) {
-                next_sport_timeout_ft = setTimeout(nextSportCallback, 6000);
+                var nextSportAndUpdateFooterCallback = function() { nextSportCallback(); updateFooterText(); };
+                next_sport_timeout_ft = setTimeout(nextSportAndUpdateFooterCallback, 6000);
             } else {
                 nextSportCallback();
             }
@@ -149,14 +144,14 @@ function myscript() {
             return
         }
 
-        var player1ScoreTT = getInt($('.player1.player__score__tt').text());
-        var player2ScoreTT = getInt($('.player2.player__score__tt').text());
-        var player1ScoreBAD = getInt($('.player1.player__score__bd').text());
-        var player2ScoreBAD = getInt($('.player2.player__score__bd').text());
-        var player1ScoreSQ = getInt($('.player1.player__score__sq').text());
-        var player2ScoreSQ = getInt($('.player2.player__score__sq').text());
-        var player1ScoreTE = getInt($('.player1.player__score__te').text());
-        var player2ScoreTE = getInt($('.player2.player__score__te').text());
+        var player1ScoreTT = getInt($('.player1.player__score__tt.player__score--show').text());
+        var player2ScoreTT = getInt($('.player2.player__score__tt.player__score--show').text());
+        var player1ScoreBAD = getInt($('.player1.player__score__bd.player__score--show').text());
+        var player2ScoreBAD = getInt($('.player2.player__score__bd.player__score--show').text());
+        var player1ScoreSQ = getInt($('.player1.player__score__sq.player__score--show').text());
+        var player2ScoreSQ = getInt($('.player2.player__score__sq.player__score--show').text());
+        var player1ScoreTE = getInt($('.player1.player__score__te.player__score--show').text());
+        var player2ScoreTE = getInt($('.player2.player__score__te.player__score--show').text());
 
         var deltaTT = player1ScoreTT - player2ScoreTT;
         var deltaBAD = player1ScoreBAD - player2ScoreBAD;
@@ -181,7 +176,7 @@ function myscript() {
             } else {
                 leader_after_squash = $('.player2.player__name').text();
                 loser_after_squash = $('.player1.player__name').text();
-                leader_points_te = player2ScoreTE;56
+                leader_points_te = player2ScoreTE;
                 loser_points_te = player1ScoreTE;
             }
 
@@ -190,16 +185,12 @@ function myscript() {
             var tennisStarted = player1ScoreTE > 0 || player2ScoreTE > 0;
 
             if (Math.abs(delta_after_sq) > 21)  {
-                // game finished after squash, no need for tennis
-                isTennisNotNeeded = true;
                 $('.footer').text(leader + ' wins by ' + Math.abs(gameDelta));
-                $('.player1.player__score__te').text('N/A');
-                $('.player2.player__score__te').text('N/A');
             }
-            else if (!tennisStarted && Math.abs(delta_after_sq) == 0) {
+            else if (Math.abs(delta_after_sq) === 0) {
                 $('.footer').text('Tennis is the decider: Draw after squash');
             }
-            else if (!tennisStarted) {
+            else if (Math.abs(delta_after_sq) <= 2) {
                 $('.footer').text('Tennis is the decider: ' + leader + ' leads by ' + Math.abs(delta_after_sq) + ' after squash');
             }
             else if (leader_points_te < tennis_points_needed && !tennisEnded) {
